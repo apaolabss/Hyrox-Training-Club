@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Llamada de seguimiento · Andrea Barbosa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EFE9;
+    --ink:#000;
+    --grey:#9A9A9A;
+    --grey-2:#6E6E6E;
+    --line:#BDBAB4;
+    --hair:#D6D3CD;
+    --cond:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+    --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  button,input{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  [hidden]{display:none !important}
+
+  .wrap{max-width:1600px;margin:0 auto;padding:40px clamp(18px,4.5vw,76px) 40px}
+
+  /* Etiquetas espaciadas */
+  .lbl{font-family:var(--cond);font-weight:500;text-transform:uppercase;letter-spacing:.32em;font-size:13px}
+  .lbl.g{color:var(--grey)}
+
+  /* Barra superior */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+  .top .left{display:flex;align-items:center;gap:26px}
+  .top .left::before{content:"";width:58px;height:1px;background:var(--ink);flex:none}
+  .top .lbl{font-size:clamp(12px,1.3vw,18px);letter-spacing:.38em}
+  .top .right{font-size:clamp(12px,1.3vw,18px);letter-spacing:.38em}
+
+  /* Fila de formato */
+  .meta{display:flex;align-items:center;flex-wrap:wrap;gap:14px 34px;padding:22px 0}
+  .meta .fmt{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+  .box{font-family:var(--cond);font-weight:800;font-size:clamp(22px,2.4vw,34px);line-height:1;padding:8px 22px;border:1.5px solid var(--ink);min-width:150px;text-align:center}
+  .box.on{background:var(--ink);color:var(--paper)}
+  .box.off{border-color:var(--grey-2);color:var(--grey);border-width:1px}
+  .slash{font-family:var(--cond);font-size:28px;color:var(--grey-2)}
+  .meta .stat{margin-left:auto;font-size:12px;letter-spacing:.34em}
+  @media (max-width:720px){.meta .stat{margin-left:0}.box{min-width:0}}
+
+  /* Rejilla */
+  .grid{border:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr)}
+  .cell{position:relative;padding:30px 30px 28px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+  .num{position:absolute;top:22px;right:26px;font-family:var(--cond);font-weight:800;font-size:clamp(28px,2.4vw,40px);line-height:1;color:var(--grey)}
+  h1,h2,.day-name{font-family:var(--cond);font-weight:800;text-transform:uppercase;line-height:.92;margin:0}
+
+  .intro{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px 48px;align-items:end;border-right:0}
+  .intro h1{font-size:clamp(48px,6.4vw,104px);margin-top:14px}
+  .intro .desc{padding-bottom:6px}
+  .intro .desc p{margin:0 0 16px;font-size:clamp(17px,1.4vw,21px);max-width:38ch}
+  .rule{height:1px;background:var(--line);margin:0 0 14px}
+  ul.dots{list-style:none;margin:0;padding:0}
+  ul.dots li{position:relative;padding-left:26px;margin:3px 0;font-size:15px}
+  ul.dots li::before{content:"";position:absolute;left:4px;top:.62em;width:5px;height:5px;background:var(--ink)}
+
+  .day{display:flex;flex-direction:column}
+  .day:nth-child(6){border-right:0}
+  .day-name{font-size:clamp(34px,2.7vw,50px);margin:16px 0 22px;white-space:nowrap}
+  .day.closed .day-name{color:var(--grey)}
+  .slots{border-top:1px solid var(--line);padding-top:16px;display:grid;gap:8px}
+  .slot{display:flex;justify-content:space-between;align-items:baseline;width:100%;background:none;border:1px solid var(--ink);padding:9px 12px;cursor:pointer;font-family:var(--cond);font-weight:700;font-size:21px;line-height:1;text-align:left;transition:background .12s,color .12s}
+  .slot small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--grey-2)}
+  .slot:hover{background:var(--ink);color:var(--paper)}
+  .slot:hover small{color:var(--hair)}
+  .slot.sel{background:var(--ink);color:var(--paper)}
+  .slot.sel small{color:var(--hair)}
+  .slot[disabled]{border-color:var(--hair);color:var(--grey);text-decoration:line-through;cursor:not-allowed;background:none}
+  .slot[disabled] small{color:var(--grey)}
+  .day.done-lock .slots{opacity:.4;pointer-events:none}
+  .closed-note{border-top:1px solid var(--line);padding-top:16px;font-size:15px;color:var(--grey-2)}
+
+  /* Formulario */
+  .form{grid-column:1 / -1;border-right:0;border-bottom:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:28px 48px}
+  .form h2{font-size:clamp(40px,4.2vw,68px);margin:14px 0 18px}
+  .chosen{font-family:var(--cond);font-weight:800;font-size:clamp(22px,2vw,30px);line-height:1.05;text-transform:uppercase;display:inline-block;background:var(--ink);color:var(--paper);padding:8px 16px}
+  .form .hint-empty{color:var(--grey-2);font-size:15px;margin:0;max-width:34ch}
+  .fields{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+  .field{padding:18px 20px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .field label{display:block;margin-bottom:10px}
+  .field input{width:100%;border:0;border-bottom:1.5px solid var(--ink);background:transparent;padding:6px 0 8px;font-size:18px;font-family:var(--body);border-radius:0}
+  .field input::placeholder{color:var(--grey)}
+  .field input:focus{outline:none;border-bottom-width:3px;padding-bottom:6.5px}
+  .field .sub{display:block;margin-top:4px;font-size:12px;color:var(--grey-2);letter-spacing:0;text-transform:none;font-family:var(--body)}
+  .field .msg{display:none;margin-top:6px;font-size:13px;color:#A12020}
+  .field.err input{border-bottom-color:#A12020}
+  .field.err .msg{display:block}
+  .actions{grid-column:1 / -1;display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:20px 0 0}
+  .cta{font-family:var(--cond);font-weight:800;font-size:26px;text-transform:uppercase;line-height:1;background:var(--ink);color:var(--paper);border:0;padding:14px 34px;cursor:pointer}
+  .cta[disabled]{background:var(--grey);cursor:not-allowed}
+  .cta.sending{cursor:wait}
+  .req{color:var(--ink);letter-spacing:0}
+  .req-note{font-size:13px;color:var(--grey-2)}
+  .form-error{font-size:14px;color:#A12020}
+  .form.locked .fields,.form.locked .actions{opacity:.35;pointer-events:none}
+
+  /* Confirmación */
+  .done h2{font-size:clamp(44px,5vw,80px)}
+  .done .when{font-family:var(--cond);font-weight:800;font-size:clamp(24px,2.4vw,34px);text-transform:uppercase;margin:6px 0 14px}
+  .done p{margin:0 0 20px;max-width:46ch;font-size:17px}
+  .ghost{display:inline-block;font-family:var(--cond);font-weight:700;font-size:20px;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1.5px solid var(--ink);padding:10px 22px}
+  .ghost:hover{background:var(--ink);color:var(--paper)}
+  .done{animation:in .35s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* Pie */
+  .foot{display:flex;align-items:center;gap:22px;margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
+  .foot .name{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.3em;font-size:clamp(14px,1.3vw,19px)}
+  .foot .sep{font-family:var(--cond);font-size:26px;line-height:1}
+  .foot .line{flex:1;height:1px;background:var(--line)}
+
+  /* Calendario móvil (tira de días) */
+  .mcal{grid-column:1 / -1;display:none;border-right:0}
+  .strip{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);margin-top:14px}
+  .dbtn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 0 10px;background:none;border:0;border-right:1px solid var(--line);cursor:pointer;min-height:76px;position:relative}
+  .dbtn:last-child{border-right:0}
+  .dbtn .d{font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:.24em;font-size:12px;padding-left:.24em}
+  .dbtn .n{font-family:var(--cond);font-weight:800;font-size:32px;line-height:1}
+  .dbtn .c{font-size:11px;color:var(--grey-2);line-height:1}
+  .dbtn.sel{background:var(--ink);color:var(--paper)}
+  .dbtn.sel .c{color:var(--hair)}
+  .dbtn[disabled]{cursor:not-allowed;color:var(--grey)}
+  .dbtn[disabled] .n{text-decoration:line-through;text-decoration-thickness:2px}
+  .mhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 0 14px}
+  .mhead .t{font-family:var(--cond);font-weight:800;font-size:34px;line-height:1;text-transform:uppercase}
+  .mslots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mslots .slot{min-height:52px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;font-size:22px}
+  .mslots.done-lock{opacity:.4;pointer-events:none}
+  .mempty{grid-column:1 / -1;font-size:15px;color:var(--grey-2);margin:0}
+
+  /* Responsivo */
+  @media (max-width:1024px){
+    .day{display:none}
+    .mcal{display:block}
+    .intro,.form{grid-template-columns:1fr}
+  }
+  @media (max-width:620px){
+    .wrap{padding:22px 16px 28px}
+    .grid{grid-template-columns:1fr}
+    .cell{padding:22px 18px}
+    .num{top:18px;right:18px}
+    .intro h1{font-size:clamp(46px,14vw,64px)}
+    .intro{gap:18px}
+    .fields{grid-template-columns:1fr}
+    .field{padding:16px 16px 14px}
+    .top{padding-bottom:18px}
+    .top .left::before{width:24px}
+    .top .left{gap:12px}
+    .top .lbl,.top .right{font-size:11px;letter-spacing:.28em}
+    .meta{padding:16px 0;gap:10px 20px}
+    .box{font-size:20px;padding:7px 12px}
+    .meta .fmt{gap:12px}
+    .slash{font-size:22px}
+    .meta .stat{font-size:10.5px;letter-spacing:.26em}
+    .form h2{font-size:44px;margin:10px 0 14px}
+    .chosen{font-size:20px}
+    .cta{width:100%;padding:17px}
+    .actions{padding-top:16px}
+    .foot{gap:12px;flex-wrap:wrap}
+    .foot .line{display:none}
+    .foot .name{font-size:12px;letter-spacing:.24em}
+    .foot .name:last-child{margin-left:auto}
+  }
+  @media (max-width:360px){
+    .dbtn .n{font-size:26px}
+    .dbtn .d{letter-spacing:.12em;font-size:11px}
+    .mslots .slot{font-size:19px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="left"><span class="lbl g">Afiliados · Temporada 26/27</span></div>
+    <div class="right lbl">Andrea Barbosa</div>
+  </header>
+
+  <div class="meta">
+    <div class="fmt">
+      <span class="lbl">Formato</span>
+      <span class="box on">30 MIN</span>
+      <span class="slash">/</span>
+      <span class="box off">5–9 OCT</span>
+    </div>
+    <span class="stat lbl g" id="stat">Hora centro de México</span>
+  </div>
+
+  <main class="grid" aria-live="polite">
+    <section class="cell intro">
+      <div>
+        <span class="lbl">Seguimiento de afiliados</span>
+        <h1>Llamada de<br>seguimiento</h1>
+      </div>
+      <div class="desc">
+        <p>Revisemos juntos tus beneficios, recursos y primeros pasos como afiliado HYROX.</p>
+        <div class="rule"></div>
+        <ul class="dots">
+          <li>Elige un horario en el calendario</li>
+          <li>Completa tus datos de contacto</li>
+          <li>Recibe la invitación en tu correo</li>
+        </ul>
+      </div>
+    </section>
+    <!-- Días escritorio (se generan con JS) -->
+    <section class="cell mcal" id="mcal">
+      <span class="lbl">Elige tu horario</span>
+      <div class="strip" id="strip" role="tablist" aria-label="Días disponibles"></div>
+      <div class="mhead"><span class="t" id="mtitle"></span><span class="lbl g" id="mdate"></span></div>
+      <div class="mslots" id="mslots"></div>
+    </section>
+    <section class="cell form locked" id="form">
+      <div id="form-side">
+        <span class="lbl">Tus datos</span>
+        <h2>Agenda tu<br>llamada</h2>
+        <p class="hint-empty" id="hint-empty">Primero elige un horario en el calendario de arriba.</p>
+        <span class="chosen" id="chosen" hidden></span>
+      </div>
+      <div id="form-main">
+        <div class="fields">
+          <div class="field" id="f-nombre">
+            <label class="lbl" for="nombre">Nombre completo <span class="req" aria-hidden="true">*</span></label>
+            <input id="nombre" required aria-required="true" autocomplete="name" placeholder="Mariana López">
+            <div class="msg">Escribe tu nombre.</div>
+          </div>
+          <div class="field" id="f-rol">
+            <label class="lbl" for="rol">Puesto o rol <span class="req" aria-hidden="true">*</span></label>
+            <input id="rol" required aria-required="true" autocomplete="organization-title" placeholder="Head Coach, dueño, gerente">
+            <div class="msg">Cuéntanos cuál es tu rol.</div>
+          </div>
+          <div class="field" id="f-whatsapp">
+            <label class="lbl" for="whatsapp">WhatsApp <span class="req" aria-hidden="true">*</span></label>
+            <input id="whatsapp" required aria-required="true" type="tel" inputmode="tel" autocomplete="tel" value="+52 " placeholder="+52 442 123 4567">
+            <div class="msg">Escribe un número de al menos 10 dígitos.</div>
+          </div>
+          <div class="field" id="f-email">
+            <label class="lbl" for="email">Correo HYROX 365 <span class="req" aria-hidden="true">*</span>
+              <span class="sub">El mismo con el que entras a la plataforma.</span>
+            </label>
+            <input id="email" required aria-required="true" type="email" inputmode="email" autocomplete="email" placeholder="tu@correo.com">
+            <div class="msg">Revisa que el correo esté completo.</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="cta" id="submit" type="button" disabled>Agendar llamada</button>
+          <span class="req-note" id="req-note">Todos los campos son obligatorios.</span>
+          <span class="form-error" id="form-error"></span>
+        </div>
+      </div>
+      <div class="done" id="done" hidden>
+        <span class="lbl">Confirmado</span>
+        <h2>Llamada agendada</h2>
+        <div class="when" id="done-when"></div>
+        <p>Te enviamos la invitación a tu correo. Si necesitas cambiar el horario, escríbeme por WhatsApp.</p>
+        <a class="ghost" id="gcal" target="_blank" rel="noopener">Añadir a Google Calendar</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="name">Andrea Barbosa</span>
+    <span class="sep">/</span>
+    <span class="name">Afiliados</span>
+    <span class="line"></span>
+    <span class="name">México</span>
+  </footer>
+</div>
+
+<script>
+/* ============ CONFIGURACIÓN ============ */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbxbWo2MQK5s6ZzcfQdH0tG3QxiQmHk9AKbYs8Xq-mPgosxMz1qQyciK96FWVGmo4MruJw/exec"; // ← URL de tu Web App de Apps Script (termina en /exec)
+
+const AVAIL = {
+  "2026-10-05": ["11:30","12:00","12:30"],
+  "2026-10-06": [],
+  "2026-10-07": ["10:00","10:30","11:00","11:30","12:00","12:30"],
+  "2026-10-08": ["10:00","10:30","11:00","11:30","12:00","12:30"],
+  "2026-10-09": ["10:00","10:30","11:00","11:30","12:00","12:30"]
+};
+const OFFSET = "-06:00";
+const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+
+let booked = new Set(), selDate=null, selTime=null, viewDay=null, locked=false;
+const $ = id => document.getElementById(id);
+const slotId=(d,t)=>`${d}T${t}:00${OFFSET}`;
+const endTime=t=>{const[h,m]=t.split(":").map(Number);const e=h*60+m+30;return `${String(Math.floor(e/60)).padStart(2,"0")}:${String(e%60).padStart(2,"0")}`};
+const dayName=d=>DIAS[new Date(d+"T12:00:00"+OFFSET).getUTCDay()];
+const labelDate=d=>`${dayName(d)} ${Number(d.slice(8))} de octubre`;
+const isFree=(d,t)=>!booked.has(slotId(d,t)) && new Date(slotId(d,t))>new Date();
+
+function renderDays(){
+  document.querySelectorAll(".day").forEach(n=>n.remove());
+  const form=$("form");
+  let total=0;
+  Object.keys(AVAIL).forEach(d=>{
+    const c=document.createElement("section");
+    c.className="cell day"+(AVAIL[d].length?"":" closed");
+    const n=d.slice(8);
+    c.innerHTML=`<span class="lbl">Día · ${n} oct</span><span class="num">${n}</span><div class="day-name">${dayName(d)}</div>`;
+    if(!AVAIL[d].length){
+      c.insertAdjacentHTML("beforeend",`<div class="closed-note">No disponible</div>`);
+    } else {
+      const box=document.createElement("div"); box.className="slots";
+      AVAIL[d].forEach(t=>{
+        const b=document.createElement("button"); b.type="button"; b.className="slot";
+        b.innerHTML=`${t}<small>${t} – ${endTime(t)}</small>`;
+        if(!isFree(d,t)){ b.disabled=true; b.setAttribute("aria-label",`${labelDate(d)}, ${t}, ocupado`); }
+        else{
+          total++;
+          b.setAttribute("aria-label",`${labelDate(d)}, ${t} a ${endTime(t)}`);
+          if(d===selDate&&t===selTime){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); }
+          b.onclick=()=>pick(d,t);
+        }
+        box.appendChild(b);
+      });
+      c.appendChild(box);
+    }
+    form.before(c);
+  });
+  renderMobile();
+  $("stat").textContent = `${total} espacios libres · Hora centro de México` + (ENDPOINT?"":" · Demo");
+}
+
+const ABR=["dom","lun","mar","mié","jue","vie","sáb"];
+const freeCount=d=>AVAIL[d].filter(t=>isFree(d,t)).length;
+function renderMobile(){
+  const days=Object.keys(AVAIL);
+  if(!viewDay||!AVAIL[viewDay].length) viewDay=days.find(d=>freeCount(d)>0)||days[0];
+  const strip=$("strip"); strip.innerHTML="";
+  days.forEach(d=>{
+    const b=document.createElement("button"); b.type="button"; b.className="dbtn"; b.setAttribute("role","tab");
+    const wd=ABR[new Date(d+"T12:00:00"+OFFSET).getUTCDay()], fc=freeCount(d);
+    b.innerHTML=`<span class="d">${wd}</span><span class="n">${d.slice(8)}</span><span class="c">${AVAIL[d].length?(fc?fc+" libres":"lleno"):"—"}</span>`;
+    if(!AVAIL[d].length){ b.disabled=true; b.setAttribute("aria-label",`${labelDate(d)}, no disponible`); }
+    else{
+      b.setAttribute("aria-label",`${labelDate(d)}, ${fc} horarios libres`);
+      b.setAttribute("aria-selected",String(d===viewDay));
+      if(d===viewDay) b.classList.add("sel");
+      b.onclick=()=>{viewDay=d; renderMobile();};
+    }
+    strip.appendChild(b);
+  });
+  $("mtitle").textContent=dayName(viewDay);
+  $("mdate").textContent=`${viewDay.slice(8)} oct`;
+  const box=$("mslots"); box.innerHTML=""; box.classList.toggle("done-lock",locked);
+  if(!freeCount(viewDay)) box.innerHTML='<p class="mempty">Este día ya no tiene horarios libres. Elige otro día.</p>';
+  AVAIL[viewDay].forEach(t=>{
+    const b=document.createElement("button"); b.type="button"; b.className="slot";
+    b.innerHTML=`${t}<small>${t} – ${endTime(t)}</small>`;
+    if(!isFree(viewDay,t)){ b.disabled=true; }
+    else{
+      if(viewDay===selDate&&t===selTime){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); }
+      const d=viewDay; b.onclick=()=>pick(d,t);
+    }
+    box.appendChild(b);
+  });
+}
+
+function pick(d,t){
+  selDate=d; selTime=t; viewDay=d; renderDays();
+  const f=$("form"); f.classList.remove("locked");
+  $("hint-empty").hidden=true;
+  const ch=$("chosen"); ch.hidden=false; ch.textContent=`${dayName(d)} ${Number(d.slice(8))} oct · ${t} – ${endTime(t)}`;
+  $("form-error").textContent="";
+  f.scrollIntoView({block:"start"});
+  refreshBtn();
+  setTimeout(()=>$("nombre").focus({preventScroll:true}),300);
+}
+
+const RULES={
+  nombre:v=>v.trim().length>=2,
+  rol:v=>v.trim().length>=2,
+  whatsapp:v=>v.replace(/\D/g,"").length>=10,
+  email:v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
+};
+const touched=new Set();
+function allValid(){ return Object.keys(RULES).every(k=>RULES[k]($(k).value)); }
+function refreshBtn(){
+  const ok=allValid()&&!!selTime;
+  $("submit").disabled=!ok;
+  const left=Object.keys(RULES).filter(k=>!RULES[k]($(k).value)).length;
+  $("req-note").textContent= !selTime ? "Elige un horario primero." : ok ? "" : `Todos los campos son obligatorios (${left} pendiente${left>1?"s":""}).`;
+}
+Object.keys(RULES).forEach(k=>{
+  const el=$(k);
+  el.addEventListener("input",()=>{ if(touched.has(k)) $("f-"+k).classList.toggle("err",!RULES[k](el.value)); refreshBtn(); });
+  el.addEventListener("blur",()=>{ touched.add(k); $("f-"+k).classList.toggle("err",!RULES[k](el.value)); refreshBtn(); });
+});
+
+function validate(){
+  let ok=true;
+  const set=(id,bad)=>{$("f-"+id).classList.toggle("err",bad); if(bad) ok=false;};
+  Object.keys(RULES).forEach(k=>set(k,!RULES[k]($(k).value)));
+  if(!ok){const i=document.querySelector(".field.err input"); i&&i.focus();}
+  return ok;
+}
+
+$("submit").onclick=async()=>{
+  if(!selTime){ $("form-error").textContent="Elige un horario primero."; return; }
+  if(!validate()) return;
+  const btn=$("submit"); btn.disabled=true; btn.classList.add("sending"); btn.textContent="Agendando…";
+  const payload={slot:slotId(selDate,selTime),nombre:$("nombre").value.trim(),rol:$("rol").value.trim(),whatsapp:$("whatsapp").value.trim(),email:$("email").value.trim().toLowerCase()};
+  try{
+    let res={ok:true};
+    if(ENDPOINT){ const r=await fetch(ENDPOINT,{method:"POST",body:JSON.stringify(payload)}); res=await r.json(); }
+    if(res.ok){ booked.add(payload.slot); showDone(); }
+    else if(res.error==="taken"){
+      booked.add(payload.slot); selTime=null; renderDays(); refreshBtn();
+      $("chosen").hidden=true; $("hint-empty").hidden=false; $("form").classList.add("locked");
+      $("form-error").textContent="";
+      $("hint-empty").textContent="Alguien acaba de tomar ese horario. Elige otro en el calendario.";
+    } else if(res.error==="missing") $("form-error").textContent="Faltan datos: revisa que todos los campos estén completos.";
+    else $("form-error").textContent="No se pudo agendar. Revisa tu conexión e inténtalo de nuevo.";
+  }catch(e){ $("form-error").textContent="No se pudo agendar. Revisa tu conexión e inténtalo de nuevo."; }
+  btn.classList.remove("sending"); btn.textContent="Agendar llamada"; refreshBtn();
+};
+
+function showDone(){
+  locked=true; renderDays();
+  document.querySelectorAll(".day").forEach(n=>n.classList.add("done-lock"));
+  $("form").scrollIntoView({block:"start"});
+  $("form-side").hidden=true; $("form-main").hidden=true; $("done").hidden=false;
+  $("done-when").textContent=`${labelDate(selDate)} · ${selTime} – ${endTime(selTime)} h`;
+  const s=new Date(slotId(selDate,selTime)),e=new Date(s.getTime()+30*60000);
+  const fmt=d=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const q=new URLSearchParams({action:"TEMPLATE",text:"Llamada de seguimiento · Andrea Barbosa",dates:`${fmt(s)}/${fmt(e)}`,details:"Revisemos juntos tus beneficios, recursos y primeros pasos como afiliado HYROX.",ctz:"America/Mexico_City"});
+  $("gcal").href="https://calendar.google.com/calendar/render?"+q.toString();
+}
+
+async function init(){
+  try{
+    if(ENDPOINT){ const r=await fetch(ENDPOINT); const data=await r.json(); (data.booked||[]).forEach(s=>booked.add(s)); }
+  }catch(e){ $("stat").textContent="No se pudo cargar la disponibilidad"; }
+  renderDays();
+}
+init();
+</script>
+</body>
+</html>
